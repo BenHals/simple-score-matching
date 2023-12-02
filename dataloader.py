@@ -18,6 +18,14 @@ class DensitySample(Generic[T]):
 
 
 def get_1d_norm_sample(n_samples: int) -> DensitySample[float]:
+    """
+
+    Args:
+        n_samples:
+
+    Returns:
+
+    """
     dist = scipy.stats.norm
     pdf: Callable[[float], float] = dist.pdf  # type: ignore
     samples: list[float] = dist.rvs(size=n_samples)  # type: ignore
@@ -26,6 +34,11 @@ def get_1d_norm_sample(n_samples: int) -> DensitySample[float]:
 
 
 def plot_1d_dataset(dataset: DensitySample[float]) -> None:
+    """
+
+    Args:
+        dataset:
+    """
     x_ticks = np.linspace(-5, 5, 1000)
     y_vals = [dataset.pdf(v) for v in x_ticks]
 
@@ -38,3 +51,5 @@ if __name__ == "__main__":
     dataset = get_1d_norm_sample(20)
     print(dataset)
     plot_1d_dataset(dataset)
+
+    get_1d_norm_sample(2)
