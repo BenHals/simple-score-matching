@@ -40,9 +40,10 @@ def get_1d_norm_sample(n_samples: int) -> DensitySample[float]:
     Returns:
 
     """
-    dist = scipy.stats.norm
-    pdf: Callable[[float], float] = dist.pdf  # type: ignore
-    samples: list[float] = dist.rvs(size=n_samples)  # type: ignore
+    dist1 = scipy.stats.norm(0, 3)
+    dist2 = scipy.stats.norm(10, 1)
+    pdf: Callable[[float], float] = lambda x: dist1.pdf(x) * dist2.pdf(x)  # type: ignore
+    samples: list[float] = list(dist1.rvs(size=n_samples // 2)) + list(dist2.rvs(size=n_samples // 2))  # type: ignore
 
     return DensitySample(pdf, samples)
 

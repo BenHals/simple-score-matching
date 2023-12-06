@@ -2,7 +2,7 @@ import torch
 import torch.autograd as autograd
 
 
-def exact_1d_score_matching(log_p: torch.Tensor, samples: torch.Tensor):
+def exact_1d_score_matching(scores: torch.Tensor, samples: torch.Tensor):
     """
     The score matching loss takes a model which outputs the log probability
     for a set of samples taken from a distribution. The aim of the loss function
@@ -39,19 +39,18 @@ def exact_1d_score_matching(log_p: torch.Tensor, samples: torch.Tensor):
     # the model. Sum across all samples, because this is how
     # log probabilities are aggregated.
     # Assumes that the model predicts log probability.
-    logp_sum = log_p.sum()
 
-    grad1 = autograd.grad(logp_sum, samples, create_graph=True, retain_graph=True)[0]
+    # grad1 = autograd.grad(scores, samples, create_graph=True, retain_graph=True)[0]
 
     # First part of the loss, the norm of the gradient at the samples
-    loss1 = torch.norm(grad1, dim=-1) ** 2 / 2
+    loss1 = torch.norm(scores, dim=-1) ** 2 / 2
 
     loss2 = torch.zeros(samples.shape[0], device=samples.device)
 
     # This is the second derivative of loss, i.e., the rate of
     # change of the gradient.
     grad2 = autograd.grad(
-        grad1[:, 0].sum(), samples, create_graph=True, retain_graph=True
+        scores[:, 0].sum(), samples, create_graph=True, retain_graph=True
     )[0][:, 0]
     loss2 += grad2
 
