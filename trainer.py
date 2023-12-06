@@ -2,9 +2,9 @@ import torch
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
 
-from dataloader import DensityDataset, DensitySample, get_1d_norm_sample, sample_2d
-from models import Config, Energy, ModelTypes, ToyMLP, load_model
-from score_matching import exact_1d_score_matching, ssm_loss
+from dataloader import DensityDataset, DensitySample, get_1d_norm_sample
+from models import Config, ModelTypes, load_model
+from score_matching import exact_1d_score_matching
 
 
 class Trainer:
@@ -12,14 +12,12 @@ class Trainer:
         self.config = config
         self.data = dataset
 
-        # self.dataset = DensityDataset(self.data.samples)
-        # self.dataloader = DataLoader(
-        #     self.dataset,
-        #     batch_size=1,
-        # )
+        self.dataset = DensityDataset(self.data.samples)
+        self.dataloader = DataLoader(
+            self.dataset,
+            batch_size=1,
+        )
         self.model = load_model(config)
-        self.dataloader = DataLoader(sample_2d("8gaussians", 250).numpy())
-        # self.model = Energy(ToyMLP())
 
     def train(self):
         optimizer = AdamW(self.model.parameters())
@@ -27,9 +25,8 @@ class Trainer:
             print(epoch_idx)
             for x in self.dataloader:
                 x.requires_grad_(True)
-                # p = self.model.forward(x)
-                # loss = exact_1d_score_matching(p, x)
-                loss = ssm_loss(self.model, x, torch.randn_like(x))
+                p = self.model.forward(x)
+                loss = exact_1d_score_matching(p, x)
                 print(loss)
 
                 loss.backward()
@@ -39,10 +36,7 @@ class Trainer:
 
 
 if __name__ == "__main__":
-    config = Config(
-        model_type=ModelTypes.Basic,
-        n_epochs=10,
-    )
+    config = Config(model_type=ModelTypes.Basic, n_epochs=10, n_inputs=1)
 
     dataset = get_1d_norm_sample(250)
 
